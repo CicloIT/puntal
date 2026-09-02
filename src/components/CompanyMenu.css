@@ -11,7 +11,8 @@
   border: none;
   border-radius: 50%;
   background: var(--ink);
-  opacity: 0.3;
+  opacity: 0.3; 
+  
   padding: 8px;
   background-clip: content-box;
   cursor: pointer;
