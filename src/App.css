@@ -1,0 +1,24 @@
+#center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2.2svh, 24px);
+  flex-grow: 1;
+  padding: clamp(12px, 3svh, 32px) 20px;
+}
+
+.edit-toggle {
+  font-family: var(--serif);
+  font-size: 14px;
+  color: var(--ink);
+  opacity: 0.6;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.edit-toggle:hover {
+  opacity: 1;
+}

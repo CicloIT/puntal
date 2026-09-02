@@ -1,0 +1,156 @@
+.edit-panel {
+  width: min(560px, 92vw);
+  border: 1px solid var(--ink-border);
+  border-radius: 2px;
+  padding: 24px;
+  text-align: left;
+}
+
+.edit-panel h2 {
+  font-size: 18px;
+  margin: 0 0 20px;
+}
+
+.edit-panel h3 {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  opacity: 0.6;
+  margin: 24px 0 12px;
+}
+
+.edit-prizes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.edit-thumb {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--ink-border);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.edit-thumb--round {
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+}
+
+.edit-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.edit-thumb span {
+  opacity: 0.5;
+  font-size: 11px;
+  text-align: center;
+}
+
+.edit-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.edit-label {
+  font-size: 14px;
+}
+
+.edit-text-input {
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--ink-border);
+  padding: 4px 0;
+}
+
+.edit-text-input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.edit-file-btn {
+  font-size: 13px;
+  color: var(--ink);
+  border: 1px solid var(--ink-border);
+  border-radius: 2px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.edit-file-btn:hover {
+  border-color: var(--ink);
+}
+
+.edit-file-btn input {
+  display: none;
+}
+
+.edit-clear-btn {
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  opacity: 0.6;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.edit-clear-btn:hover {
+  opacity: 1;
+}
+
+.edit-remove-btn {
+  color: #a3221f;
+  opacity: 0.75;
+}
+
+.edit-remove-btn:hover {
+  opacity: 1;
+}
+
+.edit-add-btn {
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: none;
+  border: 1px dashed var(--ink-border);
+  border-radius: 2px;
+  padding: 10px;
+  margin-top: 16px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.edit-add-btn:hover {
+  border-color: var(--ink);
+}

@@ -1,0 +1,56 @@
+.company-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.company-menu-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 50%;
+  background: var(--ink);
+  opacity: 0.3;
+  padding: 8px;
+  background-clip: content-box;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: opacity 0.2s;
+}
+
+.company-menu-dot:hover,
+.company-menu-dot:focus-visible {
+  opacity: 0.9;
+}
+
+.company-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+
+.company-menu-panel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 11;
+  width: max(340px, min(480px, 88vw));
+  max-height: min(70svh, 560px);
+  overflow-y: auto;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 12px 32px rgba(32, 30, 29, 0.18);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.company-menu-panel .edit-toggle {
+  align-self: center;
+  margin-top: -4px;
+}

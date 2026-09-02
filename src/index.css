@@ -1,0 +1,36 @@
+:root {
+  --paper: #f3f2f2;
+  --ink: #201e1d;
+  --neutral: #eae7e7;
+  --ink-border: rgba(32, 30, 29, 0.16);
+
+  --serif: 'Source Serif 4', system-ui, 'Segoe UI', serif;
+
+  font: 16px/145% var(--serif);
+  color-scheme: light;
+  color: var(--ink);
+  background: var(--paper);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  font: inherit;
+}

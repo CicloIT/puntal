@@ -1,0 +1,236 @@
+import { useRef, useState } from 'react'
+import './Wheel.css'
+
+const WEDGE_RADIUS = 240
+const RIM_RADIUS = 252
+const OUTLINE_RADIUS = 250
+const CENTER_RADIUS = 86
+const SPIN_TURNS = 5
+const SPIN_DURATION = 4200
+
+function polarPoint(angleDeg, radius, cx = 260, cy = 260) {
+  const rad = (angleDeg * Math.PI) / 180
+  return [cx + radius * Math.cos(rad), cy + radius * Math.sin(rad)]
+}
+
+// Gajo 0 queda centrado arriba (bajo el puntero) en reposo, igual al diseño original.
+function wedgeStart(index, segmentAngle) {
+  return -90 - segmentAngle / 2 + index * segmentAngle
+}
+
+function wedgePath(index, segmentAngle) {
+  const start = wedgeStart(index, segmentAngle)
+  const end = start + segmentAngle
+  const [x1, y1] = polarPoint(start, WEDGE_RADIUS)
+  const [x2, y2] = polarPoint(end, WEDGE_RADIUS)
+  const largeArc = segmentAngle > 180 ? 1 : 0
+  return `M 260 260 L ${x1} ${y1} A ${WEDGE_RADIUS} ${WEDGE_RADIUS} 0 ${largeArc} 1 ${x2} ${y2} Z`
+}
+
+function wedgeCenterAngle(index, segmentAngle) {
+  return wedgeStart(index, segmentAngle) + segmentAngle / 2
+}
+
+function labelFontSize(count) {
+  if (count <= 6) return 15
+  if (count <= 8) return 14
+  if (count <= 10) return 12.5
+  return 11
+}
+
+// Ancho disponible (en unidades del viewBox) para el texto de un gajo,
+// medido como la cuerda del arco en el radio de la etiqueta.
+function maxCharsForWedge(segmentAngle, labelRadius, fontSize) {
+  const chordWidth = 2 * labelRadius * Math.sin((segmentAngle * Math.PI) / 360) * 0.82
+  const avgCharWidth = fontSize * 0.56
+  return Math.max(6, Math.floor(chordWidth / avgCharWidth))
+}
+
+// Detecta un "XX% OFF" al inicio del texto para resaltarlo aparte del resto.
+const HIGHLIGHT_RE = /^(\d+%\s*(?:off|OFF|Off)?)\s*(.*)$/
+
+function splitHighlight(text) {
+  const match = text.match(HIGHLIGHT_RE)
+  if (!match || !match[1]) return { highlight: null, rest: text }
+  const highlight = match[1].trim()
+  const rest = match[2].trim()
+  return { highlight, rest: rest || null }
+}
+
+function wrapLabel(text, maxChars) {
+  const words = text.split(/\s+/).filter(Boolean)
+  const lines = []
+  let current = ''
+  const pushCurrent = () => {
+    if (current) {
+      lines.push(current)
+      current = ''
+    }
+  }
+  for (let word of words) {
+    while (word.length > maxChars) {
+      pushCurrent()
+      lines.push(word.slice(0, maxChars))
+      word = word.slice(maxChars)
+    }
+    const candidate = current ? `${current} ${word}` : word
+    if (candidate.length > maxChars) {
+      pushCurrent()
+      current = word
+    } else {
+      current = candidate
+    }
+  }
+  pushCurrent()
+  if (lines.length > 3) {
+    const kept = lines.slice(0, 3)
+    const last = kept[2]
+    kept[2] = last.length >= maxChars ? `${last.slice(0, Math.max(0, maxChars - 1))}…` : `${last}…`
+    return kept
+  }
+  return lines.length ? lines : ['']
+}
+
+// Arma las líneas a dibujar en un gajo: si el texto arranca con "XX% OFF" esa
+// parte se dibuja más grande y en negrita, y el resto (si hay) debajo, más chico.
+function buildLabelLines(label, segmentAngle, labelRadius, baseFontSize) {
+  const { highlight, rest } = splitHighlight(label)
+
+  if (!highlight) {
+    const maxChars = maxCharsForWedge(segmentAngle, labelRadius, baseFontSize)
+    return wrapLabel(label, maxChars).map((text) => ({
+      text,
+      fontSize: baseFontSize,
+      fontWeight: 600,
+    }))
+  }
+
+  const highlightFontSize = baseFontSize * 1.3
+  const restFontSize = baseFontSize * 0.82
+
+  const highlightMaxChars = maxCharsForWedge(segmentAngle, labelRadius, highlightFontSize)
+  const lines = wrapLabel(highlight, highlightMaxChars).map((text) => ({
+    text,
+    fontSize: highlightFontSize,
+    fontWeight: 800,
+  }))
+
+  if (rest) {
+    const restMaxChars = maxCharsForWedge(segmentAngle, labelRadius, restFontSize)
+    wrapLabel(rest, restMaxChars).forEach((text) => {
+      lines.push({ text, fontSize: restFontSize, fontWeight: 500 })
+    })
+  }
+
+  return lines
+}
+
+export default function Wheel({ company, onSpinEnd }) {
+  const [rotation, setRotation] = useState(0)
+  const [spinning, setSpinning] = useState(false)
+  const [winner, setWinner] = useState(null)
+  const rotationRef = useRef(0)
+
+  const prizes = company.prizes
+  const segmentAngle = 360 / prizes.length
+  const fontSize = labelFontSize(prizes.length)
+
+  function spin() {
+    if (spinning) return
+    setWinner(null)
+    setSpinning(true)
+
+    const targetIndex = Math.floor(Math.random() * prizes.length)
+    const targetCenter = wedgeCenterAngle(targetIndex, segmentAngle) + 90 // relativo al puntero (arriba = 0)
+    const jitter = (Math.random() - 0.5) * (segmentAngle * 0.6)
+    const currentBase = rotationRef.current - (rotationRef.current % 360)
+    const alignment = (360 - targetCenter + jitter + 360) % 360
+    let nextRotation = currentBase + SPIN_TURNS * 360 + alignment
+    if (nextRotation <= rotationRef.current) nextRotation += 360
+
+    rotationRef.current = nextRotation
+    setRotation(nextRotation)
+
+    setTimeout(() => {
+      setSpinning(false)
+      setWinner(prizes[targetIndex])
+      onSpinEnd?.(prizes[targetIndex], targetIndex)
+    }, SPIN_DURATION)
+  }
+
+  return (
+    <div className="wheel-block">
+      <div className="wheel-frame">
+        <div className="wheel-pointer" style={{ borderTopColor: company.ink }} />
+        <svg
+          className="wheel-svg"
+          viewBox="0 0 520 520"
+          style={{
+            transform: `rotate(${rotation}deg)`,
+            transitionDuration: spinning ? `${SPIN_DURATION}ms` : '0ms',
+          }}
+        >
+          <circle cx="260" cy="260" r={RIM_RADIUS} fill="var(--paper)" />
+
+          {prizes.map((prize, index) => {
+            const isAccent = index % 2 === 0
+            const fill = isAccent ? company.accent : company.secondary
+            const textColor = isAccent ? company.accentText : company.secondaryText
+            const mid = wedgeCenterAngle(index, segmentAngle)
+            const labelRadius = 160
+            const [labelX, labelY] = polarPoint(mid, labelRadius)
+            const lines = buildLabelLines(prize.label, segmentAngle, labelRadius, fontSize)
+            const heights = lines.map((line) => line.fontSize * 1.15)
+            const totalHeight = heights.reduce((sum, h) => sum + h, 0)
+            let cursorY = labelY - totalHeight / 2
+
+            return (
+              <g key={index}>
+                <path d={wedgePath(index, segmentAngle)} fill={fill} stroke={company.ink} strokeWidth="1.5" />
+                <text textAnchor="middle" dominantBaseline="middle" className="wheel-label" fill={textColor}>
+                  {lines.map((line, li) => {
+                    cursorY += heights[li] / 2
+                    const y = cursorY
+                    cursorY += heights[li] / 2
+                    return (
+                      <tspan
+                        key={li}
+                        x={labelX}
+                        y={y}
+                        style={{ fontSize: `${line.fontSize}px`, fontWeight: line.fontWeight }}
+                      >
+                        {line.text}
+                      </tspan>
+                    )
+                  })}
+                </text>
+              </g>
+            )
+          })}
+
+          <circle cx="260" cy="260" r={OUTLINE_RADIUS} fill="none" stroke={company.ink} strokeWidth="1.5" />
+          <circle cx="260" cy="260" r={CENTER_RADIUS} fill="var(--paper)" stroke={company.ink} strokeWidth="1.5" />
+        </svg>
+        <div className="wheel-center">
+          {company.logo ? (
+            <img src={company.logo} alt={`Logo ${company.name}`} />
+          ) : (
+            <span>{company.name}</span>
+          )}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        className="wheel-spin"
+        onClick={spin}
+        disabled={spinning}
+        style={{ background: company.accent, color: company.accentText }}
+      >
+        {spinning ? 'GIRANDO…' : 'GIRAR'}
+      </button>
+
+      {winner && !spinning && <p className="wheel-winner">Ganaste: {winner.label}</p>}
+    </div>
+  )
+}
