@@ -230,7 +230,7 @@ export default function Wheel({ company, onSpinEnd }) {
         {spinning ? 'GIRANDO…' : 'GIRAR'}
       </button>
 
-      {winner && !spinning && <p className="wheel-winner">Ganaste: {winner.label}</p>}
+      {winner && !spinning && <p className="wheel-winner">{winner.label}</p>}
     </div>
   )
 }
