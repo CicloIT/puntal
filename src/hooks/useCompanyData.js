@@ -10,6 +10,7 @@ function applyOverride(company, override) {
   if (!override) return company
   return {
     ...company,
+    name: override.name || company.name,
     logo: override.logo ?? company.logo,
     prizes: isValidPrizes(override.prizes) ? override.prizes : company.prizes,
   }
@@ -22,6 +23,14 @@ export function useCompanyData() {
     () => baseCompanies.map((company) => applyOverride(company, overrides[company.id])),
     [overrides],
   )
+
+  const setName = useCallback((companyId, name) => {
+    setOverrides((prev) => {
+      const next = { ...prev, [companyId]: { ...prev[companyId], name } }
+      saveOverrides(next)
+      return next
+    })
+  }, [])
 
   const setLogo = useCallback((companyId, image) => {
     setOverrides((prev) => {
@@ -67,5 +76,5 @@ export function useCompanyData() {
     [setPrizes],
   )
 
-  return { companies, setLogo, setPrize, addPrize, removePrize }
+  return { companies, setName, setLogo, setPrize, addPrize, removePrize }
 }

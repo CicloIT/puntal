@@ -3,7 +3,7 @@ import CompanySelector from './CompanySelector'
 import EditPanel from './EditPanel'
 import './CompanyMenu.css'
 
-export default function CompanyMenu({ companies, selectedId, onSelect, company, setLogo, setPrize, addPrize, removePrize }) {
+export default function CompanyMenu({ companies, selectedId, onSelect, company, setName, setLogo, setPrize, addPrize, removePrize }) {
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState(false)
 
@@ -16,10 +16,12 @@ export default function CompanyMenu({ companies, selectedId, onSelect, company, 
     <span className="company-menu">
       <button
         type="button"
-        className="company-menu-dot"
+        className="company-menu-trigger"
         aria-label="Cambiar empresa / editar ruleta"
         onClick={() => setOpen((v) => !v)}
-      />
+      >
+        ✎
+      </button>
 
       {open && (
         <>
@@ -39,7 +41,14 @@ export default function CompanyMenu({ companies, selectedId, onSelect, company, 
             </button>
 
             {editing && (
-              <EditPanel company={company} setLogo={setLogo} setPrize={setPrize} addPrize={addPrize} removePrize={removePrize} />
+              <EditPanel
+                company={company}
+                setName={setName}
+                setLogo={setLogo}
+                setPrize={setPrize}
+                addPrize={addPrize}
+                removePrize={removePrize}
+              />
             )}
           </div>
         </>

@@ -1,7 +1,7 @@
 import { readImageFile } from '../lib/readImageFile'
 import './EditPanel.css'
 
-export default function EditPanel({ company, setLogo, setPrize, addPrize, removePrize }) {
+export default function EditPanel({ company, setName, setLogo, setPrize, addPrize, removePrize }) {
   const prizes = company.prizes
 
   async function handleLogoChange(e) {
@@ -13,7 +13,19 @@ export default function EditPanel({ company, setLogo, setPrize, addPrize, remove
 
   return (
     <div className="edit-panel">
-      <h2>Editando: {company.name}</h2>
+      <h2>Editando empresa</h2>
+
+      <div className="edit-row">
+        <div className="edit-fields">
+          <span className="edit-label">Nombre de la empresa</span>
+          <input
+            type="text"
+            className="edit-text-input"
+            value={company.name}
+            onChange={(e) => setName(company.id, e.target.value)}
+          />
+        </div>
+      </div>
 
       <div className="edit-row edit-row--logo">
         <div className="edit-thumb edit-thumb--round">

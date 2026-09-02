@@ -6,7 +6,7 @@ import { useCompanyData } from './hooks/useCompanyData'
 import './App.css'
 
 function App() {
-  const { companies, setLogo, setPrize, addPrize, removePrize } = useCompanyData()
+  const { companies, setName, setLogo, setPrize, addPrize, removePrize } = useCompanyData()
   const [selectedId, setSelectedId] = useState(companies[0].id)
 
   const company = companies.find((c) => c.id === selectedId) ?? companies[0]
@@ -19,6 +19,7 @@ function App() {
           selectedId={selectedId}
           onSelect={setSelectedId}
           company={company}
+          setName={setName}
           setLogo={setLogo}
           setPrize={setPrize}
           addPrize={addPrize}
