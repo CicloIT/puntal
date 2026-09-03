@@ -17,6 +17,35 @@ const CENTER_RADIUS = 86
 const SPIN_TURNS = 5
 const SPIN_DURATION = 4200
 
+// "Seguí participando" pesa más que cada premio individual; los premios
+// reales siempre pesan lo mismo entre sí, sin importar cuántos gajos haya.
+const LOSE_WEIGHT = 2
+const WIN_WEIGHT = 1
+
+function normalizeLabel(text) {
+  return text
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function isLosePrize(prize) {
+  return normalizeLabel(prize.label) === 'segui participando'
+}
+
+function pickWeightedIndex(prizes) {
+  const weights = prizes.map((prize) => (isLosePrize(prize) ? LOSE_WEIGHT : WIN_WEIGHT))
+  const total = weights.reduce((sum, w) => sum + w, 0)
+  let roll = Math.random() * total
+  for (let i = 0; i < weights.length; i++) {
+    roll -= weights[i]
+    if (roll <= 0) return i
+  }
+  return weights.length - 1
+}
+
 function polarPoint(angleDeg, radius, cx = 260, cy = 260) {
   const rad = (angleDeg * Math.PI) / 180
   return [cx + radius * Math.cos(rad), cy + radius * Math.sin(rad)]
@@ -178,7 +207,7 @@ export default function Wheel({ company, onSpinEnd }) {
     setWinner(null)
     setSpinning(true)
 
-    const targetIndex = Math.floor(Math.random() * prizes.length)
+    const targetIndex = pickWeightedIndex(prizes)
     const targetCenter = wedgeCenterAngle(targetIndex, segmentAngle) + 90 // relativo al puntero (arriba = 0)
     const jitter = (Math.random() - 0.5) * (segmentAngle * 0.6)
     const currentBase = rotationRef.current - (rotationRef.current % 360)
@@ -282,16 +311,15 @@ export default function Wheel({ company, onSpinEnd }) {
         {spinning ? 'GIRANDO…' : 'GIRAR'}
       </button>
 
-      {winner && !spinning && (
-        <div className="wheel-winner">
-          {winner.logo && (
-            <span className="wheel-winner-logo" style={{ background: winner.logoBg || '#fff' }}>
-              <img src={winner.logo} alt="" />
-            </span>
-          )}
-          <span className="wheel-winner-label">{winner.label}</span>
-        </div>
-      )}
+      <div className={`wheel-winner${winner && !spinning ? ' is-visible' : ''}`}>
+        <span
+          className={`wheel-winner-logo${winner?.logo ? ' has-logo' : ''}`}
+          style={{ background: winner?.logo ? winner.logoBg || '#fff' : 'transparent' }}
+        >
+          {winner?.logo && <img src={winner.logo} alt="" />}
+        </span>
+        <span className="wheel-winner-label">{winner?.label || ' '}</span>
+      </div>
     </div>
   )
 }
