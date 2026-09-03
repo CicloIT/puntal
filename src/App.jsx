@@ -1,7 +1,9 @@
 import Header from './components/Header'
 import Wheel from './components/Wheel'
 import CompanyMenu from './components/CompanyMenu'
+import Sponsors from './components/Sponsors'
 import { useCompanyData } from './hooks/useCompanyData'
+import { sponsors } from './data/companies'
 import './App.css'
 
 function App() {
@@ -21,7 +23,10 @@ function App() {
         />
       </Header>
       <main id="center">
-        <Wheel key={company.id} company={company} />
+        <Sponsors sponsors={sponsors} />
+        <div className="wheel-column">
+          <Wheel key={company.id} company={company} />
+        </div>
       </main>
     </>
   )

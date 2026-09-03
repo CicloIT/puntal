@@ -1,11 +1,20 @@
 #center {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: clamp(8px, 1.8svh, 20px);
+  gap: clamp(16px, 3vw, 48px);
   flex-grow: 1;
   padding: clamp(8px, 2svh, 24px) 20px;
+}
+
+.wheel-column {
+  container-type: inline-size;
+  display: flex;
+  justify-content: center;
+  flex: none;
+  width: min(820px, 100%);
 }
 
 .edit-toggle {

@@ -1,5 +1,11 @@
 const BASE_URL = import.meta.env.BASE_URL
 
+export const sponsors = [
+  { name: 'Lazo Mate', logo: `${BASE_URL}LazoMate.png` },
+  { name: 'Ven a Ver', logo: `${BASE_URL}VenaVer.png`, logoBg: '#201e1d' },
+  { name: 'Abriles', logo: `${BASE_URL}Abriles.jpeg` },
+]
+
 // Paleta calcada del diseño original (Claude Design): cada empresa define
 // su propio acento, color secundario, color de tinta (bordes/trazos) y el
 // color de texto legible sobre cada uno de esos dos fondos.

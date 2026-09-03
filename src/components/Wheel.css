@@ -7,7 +7,7 @@
 
 .wheel-frame {
   position: relative;
-  width: min(820px, 88vw, calc(100svh - 220px));
+  width: min(820px, 96cqw, 88vw, calc(100svh - 220px));
   aspect-ratio: 1;
 }
 
