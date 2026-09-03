@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import Header from './components/Header'
 import Wheel from './components/Wheel'
 import CompanyMenu from './components/CompanyMenu'
@@ -7,17 +6,12 @@ import './App.css'
 
 function App() {
   const { companies, setName, setLogo, setPrize, addPrize, removePrize } = useCompanyData()
-  const [selectedId, setSelectedId] = useState(companies[0].id)
-
-  const company = companies.find((c) => c.id === selectedId) ?? companies[0]
+  const company = companies[0]
 
   return (
     <>
       <Header company={company}>
         <CompanyMenu
-          companies={companies}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
           company={company}
           setName={setName}
           setLogo={setLogo}

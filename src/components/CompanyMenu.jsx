@@ -1,23 +1,16 @@
 import { useState } from 'react'
-import CompanySelector from './CompanySelector'
 import EditPanel from './EditPanel'
 import './CompanyMenu.css'
 
-export default function CompanyMenu({ companies, selectedId, onSelect, company, setName, setLogo, setPrize, addPrize, removePrize }) {
+export default function CompanyMenu({ company, setName, setLogo, setPrize, addPrize, removePrize }) {
   const [open, setOpen] = useState(false)
-  const [editing, setEditing] = useState(false)
-
-  function close() {
-    setOpen(false)
-    setEditing(false)
-  }
 
   return (
     <span className="company-menu">
       <button
         type="button"
         className="company-menu-trigger"
-        aria-label="Cambiar empresa / editar ruleta"
+        aria-label="Editar ruleta"
         onClick={() => setOpen((v) => !v)}
       >
         ✎
@@ -25,31 +18,16 @@ export default function CompanyMenu({ companies, selectedId, onSelect, company, 
 
       {open && (
         <>
-          <div className="company-menu-backdrop" onClick={close} />
+          <div className="company-menu-backdrop" onClick={() => setOpen(false)} />
           <div className="company-menu-panel">
-            <CompanySelector
-              companies={companies}
-              selectedId={selectedId}
-              onSelect={(id) => {
-                onSelect(id)
-                setEditing(false)
-              }}
+            <EditPanel
+              company={company}
+              setName={setName}
+              setLogo={setLogo}
+              setPrize={setPrize}
+              addPrize={addPrize}
+              removePrize={removePrize}
             />
-
-            <button type="button" className="edit-toggle" onClick={() => setEditing((v) => !v)}>
-              {editing ? 'Cerrar edición' : 'Editar logo y premios'}
-            </button>
-
-            {editing && (
-              <EditPanel
-                company={company}
-                setName={setName}
-                setLogo={setLogo}
-                setPrize={setPrize}
-                addPrize={addPrize}
-                removePrize={removePrize}
-              />
-            )}
           </div>
         </>
       )}

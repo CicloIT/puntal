@@ -1,9 +1,18 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './Wheel.css'
 
-const WEDGE_RADIUS = 240
-const RIM_RADIUS = 252
-const OUTLINE_RADIUS = 250
+const LABEL_FONT_STACK = "'Source Serif 4', system-ui, 'Segoe UI', serif"
+
+let measureCtx = null
+function measureTextWidth(text, fontSize, fontWeight) {
+  if (!measureCtx) measureCtx = document.createElement('canvas').getContext('2d')
+  measureCtx.font = `${fontWeight} ${fontSize}px ${LABEL_FONT_STACK}`
+  return measureCtx.measureText(text).width
+}
+
+const WEDGE_RADIUS = 248
+const RIM_RADIUS = 258
+const OUTLINE_RADIUS = 256
 const CENTER_RADIUS = 86
 const SPIN_TURNS = 5
 const SPIN_DURATION = 4200
@@ -32,18 +41,30 @@ function wedgeCenterAngle(index, segmentAngle) {
 }
 
 function labelFontSize(count) {
-  if (count <= 6) return 15
+  if (count <= 6) return 20
   if (count <= 8) return 14
   if (count <= 10) return 12.5
   return 11
 }
 
 // Ancho disponible (en unidades del viewBox) para el texto de un gajo,
-// medido como la cuerda del arco en el radio de la etiqueta.
-function maxCharsForWedge(segmentAngle, labelRadius, fontSize) {
-  const chordWidth = 2 * labelRadius * Math.sin((segmentAngle * Math.PI) / 360) * 0.82
-  const avgCharWidth = fontSize * 0.56
-  return Math.max(6, Math.floor(chordWidth / avgCharWidth))
+// medido como la cuerda del arco en el radio de la etiqueta. Se usa solo
+// como estimación inicial para decidir el salto de línea.
+function wedgeAvailableWidth(segmentAngle, labelRadius) {
+  return 2 * labelRadius * Math.sin((segmentAngle * Math.PI) / 360) * 0.86
+}
+
+// Rotación del bloque de texto para que quede alineado tangencialmente al
+// gajo (como en una ruleta real: el texto "sigue" la curva). Con el texto
+// alineado así, el ancho de cuerda (wedgeAvailableWidth) es exacto — ya no
+// hay descalce entre el texto horizontal y los bordes en diagonal del gajo.
+// Se normaliza a (-90°, 90°] para que el texto nunca quede cabeza abajo.
+function wedgeTextRotation(mid) {
+  let r = mid + 90
+  r = ((r + 180) % 360 + 360) % 360 - 180
+  if (r > 90) r -= 180
+  else if (r <= -90) r += 180
+  return r
 }
 
 // Detecta un "XX% OFF" al inicio del texto para resaltarlo aparte del resto.
@@ -57,7 +78,15 @@ function splitHighlight(text) {
   return { highlight, rest: rest || null }
 }
 
-function wrapLabel(text, maxChars) {
+// Corta una palabra que sola ya excede el ancho disponible, letra a letra,
+// usando el ancho real medido (no una estimación).
+function breakWord(word, maxWidth, fontSize, fontWeight) {
+  let cut = word.length
+  while (cut > 1 && measureTextWidth(word.slice(0, cut), fontSize, fontWeight) > maxWidth) cut--
+  return [word.slice(0, cut), word.slice(cut)]
+}
+
+function wrapLabel(text, maxWidth, fontSize, fontWeight) {
   const words = text.split(/\s+/).filter(Boolean)
   const lines = []
   let current = ''
@@ -68,13 +97,14 @@ function wrapLabel(text, maxChars) {
     }
   }
   for (let word of words) {
-    while (word.length > maxChars) {
+    while (measureTextWidth(word, fontSize, fontWeight) > maxWidth && word.length > 1) {
       pushCurrent()
-      lines.push(word.slice(0, maxChars))
-      word = word.slice(maxChars)
+      const [head, tail] = breakWord(word, maxWidth, fontSize, fontWeight)
+      lines.push(head)
+      word = tail
     }
     const candidate = current ? `${current} ${word}` : word
-    if (candidate.length > maxChars) {
+    if (current && measureTextWidth(candidate, fontSize, fontWeight) > maxWidth) {
       pushCurrent()
       current = word
     } else {
@@ -84,8 +114,11 @@ function wrapLabel(text, maxChars) {
   pushCurrent()
   if (lines.length > 3) {
     const kept = lines.slice(0, 3)
-    const last = kept[2]
-    kept[2] = last.length >= maxChars ? `${last.slice(0, Math.max(0, maxChars - 1))}…` : `${last}…`
+    let last = kept[2]
+    while (last.length > 1 && measureTextWidth(`${last}…`, fontSize, fontWeight) > maxWidth) {
+      last = last.slice(0, -1)
+    }
+    kept[2] = `${last}…`
     return kept
   }
   return lines.length ? lines : ['']
@@ -95,10 +128,10 @@ function wrapLabel(text, maxChars) {
 // parte se dibuja más grande y en negrita, y el resto (si hay) debajo, más chico.
 function buildLabelLines(label, segmentAngle, labelRadius, baseFontSize) {
   const { highlight, rest } = splitHighlight(label)
+  const maxWidth = wedgeAvailableWidth(segmentAngle, labelRadius)
 
   if (!highlight) {
-    const maxChars = maxCharsForWedge(segmentAngle, labelRadius, baseFontSize)
-    return wrapLabel(label, maxChars).map((text) => ({
+    return wrapLabel(label, maxWidth, baseFontSize, 600).map((text) => ({
       text,
       fontSize: baseFontSize,
       fontWeight: 600,
@@ -108,16 +141,14 @@ function buildLabelLines(label, segmentAngle, labelRadius, baseFontSize) {
   const highlightFontSize = baseFontSize * 1.3
   const restFontSize = baseFontSize * 0.82
 
-  const highlightMaxChars = maxCharsForWedge(segmentAngle, labelRadius, highlightFontSize)
-  const lines = wrapLabel(highlight, highlightMaxChars).map((text) => ({
+  const lines = wrapLabel(highlight, maxWidth, highlightFontSize, 800).map((text) => ({
     text,
     fontSize: highlightFontSize,
     fontWeight: 800,
   }))
 
   if (rest) {
-    const restMaxChars = maxCharsForWedge(segmentAngle, labelRadius, restFontSize)
-    wrapLabel(rest, restMaxChars).forEach((text) => {
+    wrapLabel(rest, maxWidth, restFontSize, 500).forEach((text) => {
       lines.push({ text, fontSize: restFontSize, fontWeight: 500 })
     })
   }
@@ -129,7 +160,14 @@ export default function Wheel({ company, onSpinEnd }) {
   const [rotation, setRotation] = useState(0)
   const [spinning, setSpinning] = useState(false)
   const [winner, setWinner] = useState(null)
+  const [, forceRerender] = useState(0)
   const rotationRef = useRef(0)
+
+  // Las medidas de texto dependen de la tipografía real; si carga después
+  // del primer render, recalculamos el wrap una vez que esté lista.
+  useEffect(() => {
+    document.fonts?.ready.then(() => forceRerender((n) => n + 1))
+  }, [])
 
   const prizes = company.prizes
   const segmentAngle = 360 / prizes.length
@@ -177,27 +215,41 @@ export default function Wheel({ company, onSpinEnd }) {
             const fill = isAccent ? company.accent : company.secondary
             const textColor = isAccent ? company.accentText : company.secondaryText
             const mid = wedgeCenterAngle(index, segmentAngle)
-            const labelRadius = 160
+            const labelRadius = 188
             const [labelX, labelY] = polarPoint(mid, labelRadius)
+            const maxWidth = wedgeAvailableWidth(segmentAngle, labelRadius)
             const lines = buildLabelLines(prize.label, segmentAngle, labelRadius, fontSize)
             const heights = lines.map((line) => line.fontSize * 1.15)
             const totalHeight = heights.reduce((sum, h) => sum + h, 0)
             let cursorY = labelY - totalHeight / 2
+            const textRotation = wedgeTextRotation(mid)
 
             return (
               <g key={index}>
                 <path d={wedgePath(index, segmentAngle)} fill={fill} stroke={company.ink} strokeWidth="1.5" />
-                <text textAnchor="middle" dominantBaseline="middle" className="wheel-label" fill={textColor}>
+                <text
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  className="wheel-label"
+                  fill={textColor}
+                  transform={`rotate(${textRotation} ${labelX} ${labelY})`}
+                >
                   {lines.map((line, li) => {
                     cursorY += heights[li] / 2
                     const y = cursorY
                     cursorY += heights[li] / 2
+                    // Red de seguridad: si por lo que sea la medida real excede lo
+                    // calculado, se fuerza el ancho exacto (nunca se estira, solo achica).
+                    const measured = measureTextWidth(line.text, line.fontSize, line.fontWeight)
+                    const fitsProps =
+                      measured > maxWidth ? { textLength: maxWidth, lengthAdjust: 'spacingAndGlyphs' } : {}
                     return (
                       <tspan
                         key={li}
                         x={labelX}
                         y={y}
                         style={{ fontSize: `${line.fontSize}px`, fontWeight: line.fontWeight }}
+                        {...fitsProps}
                       >
                         {line.text}
                       </tspan>
@@ -211,7 +263,7 @@ export default function Wheel({ company, onSpinEnd }) {
           <circle cx="260" cy="260" r={OUTLINE_RADIUS} fill="none" stroke={company.ink} strokeWidth="1.5" />
           <circle cx="260" cy="260" r={CENTER_RADIUS} fill="var(--paper)" stroke={company.ink} strokeWidth="1.5" />
         </svg>
-        <div className="wheel-center">
+        <div className="wheel-center" style={company.logo ? { background: company.accent } : undefined}>
           {company.logo ? (
             <img src={company.logo} alt={`Logo ${company.name}`} />
           ) : (
@@ -230,7 +282,16 @@ export default function Wheel({ company, onSpinEnd }) {
         {spinning ? 'GIRANDO…' : 'GIRAR'}
       </button>
 
-      {winner && !spinning && <p className="wheel-winner">{winner.label}</p>}
+      {winner && !spinning && (
+        <div className="wheel-winner">
+          {winner.logo && (
+            <span className="wheel-winner-logo" style={{ background: winner.logoBg || '#fff' }}>
+              <img src={winner.logo} alt="" />
+            </span>
+          )}
+          <span className="wheel-winner-label">{winner.label}</span>
+        </div>
+      )}
     </div>
   )
 }
