@@ -1,7 +1,7 @@
 const BASE_URL = import.meta.env.BASE_URL
 
 export const sponsors = [
-  { name: 'Lazo Mate', logo: `${BASE_URL}LazoMate.png` },
+  { name: 'Lazo Matero', logo: `${BASE_URL}LazoMate.png` },
   { name: 'Ven a Ver', logo: `${BASE_URL}VenaVer.png`, logoBg: '#201e1d' },
   { name: 'Abriles', logo: `${BASE_URL}Abriles.jpeg` },
 ]
@@ -20,10 +20,10 @@ export const companies = [
     ink: '#201e1d',
     logo: `${BASE_URL}Puntal.png`,
     prizes: [
-      { label: 'Premio Lazo Mate', logo: `${BASE_URL}LazoMate.png` },
+      { label: 'Premio Lazo Matero', logo: `${BASE_URL}LazoMate.png` },
       { label: 'Seguí participando', logo: null },
       { label: 'Premio Abriles', logo: `${BASE_URL}Abriles.jpeg` },
-      { label: 'Premio Lazo Mate', logo: `${BASE_URL}LazoMate.png` },
+      { label: 'Premio Lazo Matero', logo: `${BASE_URL}LazoMate.png` },
       { label: 'Seguí participando', logo: null },
       { label: 'Premio Ven a Ver', logo: `${BASE_URL}VenaVer.png`, logoBg: '#201e1d' },
     ],
