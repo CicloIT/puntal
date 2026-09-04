@@ -4,6 +4,7 @@ export const sponsors = [
   { name: 'Lazo Matero', logo: `${BASE_URL}LazoMate.png` },
   { name: 'Ven a Ver', logo: `${BASE_URL}VenaVer.png`, logoBg: '#201e1d' },
   { name: 'Abriles', logo: `${BASE_URL}Abriles.jpeg` },
+  { name: 'Oonguis', logo: `${BASE_URL}Oonguis.png` },
 ]
 
 // Paleta calcada del diseño original (Claude Design): cada empresa define
@@ -26,6 +27,8 @@ export const companies = [
       { label: 'Premio Lazo Matero', logo: `${BASE_URL}LazoMate.png` },
       { label: 'Seguí participando', logo: null },
       { label: 'Premio Ven a Ver', logo: `${BASE_URL}VenaVer.png`, logoBg: '#201e1d' },
+      { label: 'Premio Oonguis', logo: `${BASE_URL}Oonguis.png` },
+      { label: 'Seguí participando', logo: null },
     ],
   },
 ]
