@@ -219,6 +219,13 @@ export default function Wheel({ company, onSpinEnd }) {
     setRotation(nextRotation)
 
     setTimeout(() => {
+      // Normaliza la rotación acumulada a un valor chico (mismo ángulo visual,
+      // mod 360) para que no crezca sin límite giro tras giro — en algunos
+      // navegadores un transform rotate() con grados muy altos traba la
+      // animación. Sin transición activa (spinning=false), el salto es instantáneo.
+      const normalized = nextRotation % 360
+      rotationRef.current = normalized
+      setRotation(normalized)
       setSpinning(false)
       setWinner(prizes[targetIndex])
       onSpinEnd?.(prizes[targetIndex], targetIndex)
