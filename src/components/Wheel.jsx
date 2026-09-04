@@ -247,7 +247,7 @@ export default function Wheel({ company, onSpinEnd }) {
             const labelRadius = 188
             const [labelX, labelY] = polarPoint(mid, labelRadius)
             const maxWidth = wedgeAvailableWidth(segmentAngle, labelRadius)
-            const lines = buildLabelLines(prize.label, segmentAngle, labelRadius, fontSize)
+            const lines = buildLabelLines(prize.label.toUpperCase(), segmentAngle, labelRadius, fontSize)
             const heights = lines.map((line) => line.fontSize * 1.15)
             const totalHeight = heights.reduce((sum, h) => sum + h, 0)
             let cursorY = labelY - totalHeight / 2

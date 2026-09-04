@@ -15,7 +15,7 @@ export const companies = [
     id: 'puntal',
     name: 'Puntal',
     accent: '#0088b0',
-    accentText: '#201e1d',
+    accentText: '#ffffff',
     secondary: '#eae7e7',
     secondaryText: '#201e1d',
     ink: '#201e1d',

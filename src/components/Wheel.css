@@ -139,6 +139,7 @@
   font-size: clamp(16px, 3.6vw, 22px);
   font-weight: 600;
   color: var(--ink);
+  text-transform: uppercase;
 }
 
 @keyframes wheel-winner-in {

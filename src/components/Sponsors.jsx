@@ -10,7 +10,6 @@ export default function Sponsors({ sponsors }) {
             <span className="sponsors-logo" style={{ background: sponsor.logoBg || '#fff' }}>
               <img src={sponsor.logo} alt={`Logo ${sponsor.name}`} />
             </span>
-            <span className="sponsors-name">{sponsor.name}</span>
           </li>
         ))}
       </ul>
